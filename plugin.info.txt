@@ -1,7 +1,7 @@
 base   bpmnioeditor
 author peterfromearth
 email  coder@peterfromearth.de
-date   2021-11-07
+date   2022-02-22
 name   bpmnioeditor plugin
 desc   bpmnio
 url    https://dokuwiki.org/plugin:bpmnioeditor
