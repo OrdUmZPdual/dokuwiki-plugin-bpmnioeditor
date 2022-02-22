@@ -11,8 +11,8 @@ jQuery(document).ready(function(){
     jQuery('a.media.mediafile.mf_bpmn').each(function(index) {
         // START Insert html elements to display and edit
         var $bpmn = jQuery(this);			
-        var $canvas_view = jQuery('<div id="bpmn_canvas_'+ index +'_view" class="plugin_bpmnioeditor canvas hidden" />').insertAfter($bpmn);
-        var $canvas_edit = jQuery('<div id="bpmn_canvas_'+ index +'_edit" class="plugin_bpmnioeditor canvas hidden" />').insertAfter($canvas_view);
+        var $canvas_view = jQuery('<div id="bpmn_canvas_'+ index +'_view" class="plugin_bpmnioeditor canvas" style="display:none" />').insertAfter($bpmn);
+        var $canvas_edit = jQuery('<div id="bpmn_canvas_'+ index +'_edit" class="plugin_bpmnioeditor canvas" style="display:none" />').insertAfter($canvas_view);
 
         window.bpmn[index] = [];
         window.bpmn[index]['name'] = getQuery($bpmn.attr('href'), 'media');
@@ -20,9 +20,9 @@ jQuery(document).ready(function(){
         
         //START Insert buttons to the current field
         jQuery('<span style="float:right"> by <a href="https://peterfromearth.de">peterfromearth.de</a></span>').insertAfter($canvas_edit);
-        jQuery('<button id="bpmn_'+index+'_edit_button" class="bpmnEditButton hidden" >'+LANG.plugins.bpmnioeditor.edit_bpmn+'</button>').insertAfter($canvas_edit);
-        jQuery('<button id="bpmn_'+index+'_save_button" class="bpmnSaveButton hidden" style="margin-left:0.2%;">'+LANG.plugins.bpmnioeditor.save_bpmn+'</button>').insertAfter($canvas_edit);
-        jQuery('<button id="bpmn_'+index+'_view_button" class="bpmnViewButton hidden" >'+LANG.plugins.bpmnioeditor.view_bpmn+'</button>').insertAfter($canvas_edit);
+        jQuery('<button id="bpmn_'+index+'_edit_button" class="bpmnEditButton" style="display:none" >'+LANG.plugins.bpmnioeditor.edit_bpmn+'</button>').insertAfter($canvas_edit);
+        jQuery('<button id="bpmn_'+index+'_save_button" class="bpmnSaveButton" style="margin-left:0.2%;display:none;">'+LANG.plugins.bpmnioeditor.save_bpmn+'</button>').insertAfter($canvas_edit);
+        jQuery('<button id="bpmn_'+index+'_view_button" class="bpmnViewButton" style="display:none" >'+LANG.plugins.bpmnioeditor.view_bpmn+'</button>').insertAfter($canvas_edit);
         
         jQuery('#bpmn_'+index+'_edit_button').on('click', function(){
             toggleButtons(index);
@@ -33,7 +33,7 @@ jQuery(document).ready(function(){
             }
             toggleButtons(index);
             jQuery('#bpmn_'+index+'_edit_button').show();
-            jQuery('#bpmn_'+index+'_view').toggleClass('hidden');
+            jQuery('#bpmn_'+index+'_view').toggle();
             changeToView($bpmn, index);
         });
         jQuery('#bpmn_'+index+'_save_button').on('click', function(){
@@ -134,21 +134,21 @@ jQuery(document).ready(function(){
             url:$bpmn.attr('href'),
             dataType:'text',
             cache: false,
-            success: async function(xml) {
+            success: function(xml) {
                 if(xml.length == 0){
                     xml = getDefaultDataIfFileNotExisting();
                 }
                 try {
-                    await modeler.importXML(xml);
+                    modeler.importXML(xml);
                     modeler.get('canvas').zoom('fit-viewport');
                 } catch (err) {
                     console.log(LANG.plugins.bpmnioeditor.error_loading_bpmn, err);
                 }
 
             },
-            error: async function(){
+            error:  function(){
                 try {
-                    const result = await modeler.importXML(getDefaultDataIfFileNotExisting());
+                    const result =  modeler.importXML(getDefaultDataIfFileNotExisting());
                 } catch (err) {
                     console.log(LANG.plugins.bpmnioeditor.error_loading_bpmn, err);
                 }
@@ -163,7 +163,7 @@ jQuery(document).ready(function(){
         var BpmnJS = window.BpmnJS;
         var viewer;
         
-        jQuery('#bpmn_canvas_'+index+'_view').hide();
+        jQuery('#bpmn_canvas_'+index+'_view').show();
         
         if(typeof window.bpmn[""+index]['view'] == "undefined"){
             viewer = new BpmnJS.Viewer({
@@ -174,16 +174,16 @@ jQuery(document).ready(function(){
         } else {
             viewer = window.bpmn[""+index]['view'];
         }
-        
+
         jQuery.ajax({
             url:$bpmn.attr('href'),
             dataType:'text',
             cache: false,
-            success: async function(xml) {
+            success: function(xml) {
                 if(xml.length > 0){
                     
                     try {
-                        await viewer.importXML(xml);
+                         viewer.importXML(xml);
                         jQuery('#bpmn_canvas_'+index+'_view').show();
                         viewer.get('canvas').zoom('fit-viewport');
                        
@@ -200,17 +200,18 @@ jQuery(document).ready(function(){
                 jQuery('#bpmn_canvas_'+index+'_view').hide();
                 jQuery('#bpmn_canvas_'+index+'_view').removeClass('canvas');
                 jQuery('#bpmn_'+index+'_edit_button').text(LANG.plugins.bpmnioeditor.create_bpmn);
+		jQuery('#bpmn_'+index+'_edit_button').show();
             },
         });
         jQuery('#bpmn_canvas_'+index+'_edit').hide();
     }
 
     function toggleButtons(index){
-        jQuery('#bpmn_canvas_'+index+'_edit').toggleClass('hidden');
-        jQuery('#bpmn_canvas_'+index+'_view').toggleClass('hidden');
-        jQuery('#bpmn_'+index+'_view_button').toggleClass('hidden');
-        jQuery('#bpmn_'+index+'_save_button').toggleClass('hidden');
-        jQuery('#bpmn_'+index+'_edit_button').toggleClass('hidden');
+        jQuery('#bpmn_canvas_'+index+'_edit').toggle();
+        jQuery('#bpmn_canvas_'+index+'_view').toggle();
+        jQuery('#bpmn_'+index+'_view_button').toggle();
+        jQuery('#bpmn_'+index+'_save_button').toggle();
+        jQuery('#bpmn_'+index+'_edit_button').toggle();
         var sidebar = jQuery('#dokuwiki__aside');
         if(sidebar.length !== 0){   
             sidebar.css('position', 'relative');
@@ -238,11 +239,11 @@ jQuery(document).ready(function(){
                 newXML: resultSave.xml,
                 type: window.bpmn[index]['type'],
             },
-            success: async function(data){
+            success:  function(data){
                 console.info(LANG.plugins.bpmnioeditor.bpmn_successfully_saved);
                 const modeler = window.bpmn[""+index]['view'];
                 try {
-                    const result = await modeler.importXML(resultSave.xml);
+                    const result =  modeler.importXML(resultSave.xml);
                     modeler.get('canvas').zoom('fit-viewport');
                   
                     if(window.bpmn[index]['type'] == 'create'){
@@ -267,18 +268,24 @@ jQuery(document).ready(function(){
     }
 
     function getDefaultDataIfFileNotExisting(){
-        return '<?xml version="1.0" encoding="UTF-8"?>'+
-            '<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn">' +
-          '<bpmn:process id="Process_1" isExecutable="false" />' +
-          '<bpmndi:BPMNDiagram id="BPMNDiagram_1">' +
-            '<bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_1" />' +
-          '</bpmndi:BPMNDiagram>' +
-        '</bpmn:definitions>';
+        return `
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" id="Definitions_0h948s6" targetNamespace="http://bpmn.io/schema/bpmn" exporter="bpmn-js (https://demo.bpmn.io)" exporterVersion="9.0.1">
+  <bpmn:process id="Process_02ki0vd" isExecutable="false">
+    <bpmn:startEvent id="StartEvent_1mnafvk" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_02ki0vd">
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1mnafvk">
+        <dc:Bounds x="156" y="81" width="36" height="36" />
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
+`;
     }
 
     function getQuery(searchstring, q) {
        return (searchstring.match(new RegExp('[?&]' + q + '=([^&]+)')) || [, null])[1];
     }
 });
-
-
