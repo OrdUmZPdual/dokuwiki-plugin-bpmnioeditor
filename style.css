@@ -981,3 +981,8 @@ marker.djs-dragger tspan {
 .bpmn-icon-hand-tool:before { content: '\e868'; } /* '' */
 .bpmn-icon-group:before { content: '\e869'; } /* '' */
 .bpmn-icon-transaction:before { content: '\e8c4'; } /* '' */
+
+.bjs-container svg {
+    height: 100%;
+    width: 100%;
+}
